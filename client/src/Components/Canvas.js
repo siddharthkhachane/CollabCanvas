@@ -10,7 +10,9 @@ const Canvas = ({ roomId, userName }) => {
   
   useEffect(() => {
     // Connect to socket server
-    const newSocket = io('http://localhost:5000');
+    //const newSocket = io('http://localhost:5000');
+    const newSocket = io('https://collabcanvas-364y.onrender.com');
+
     setSocket(newSocket);
     
     // Join room when component mounts
