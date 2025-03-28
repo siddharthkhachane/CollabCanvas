@@ -4,14 +4,12 @@ const socketIO = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-
-const corsOptions = {
-  origin: "*",
-  methods: ["GET", "POST"],
-  credentials: false
-};
 const app = express();
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: "https://sidproject-41.wl.r.appspot.com",
+  methods: "GET,POST",
+  credentials: false
+}));
 app.use(express.json());
 
 const server = http.createServer(app);
