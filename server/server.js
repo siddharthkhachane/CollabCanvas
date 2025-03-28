@@ -11,11 +11,11 @@ app.use(express.json());
 
 const server = http.createServer(app);
 const io = socketIO(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+app.use(cors({
+  origin: ["http://localhost:3000", "https://client-5zk70goat-sids-projects-10757798.vercel.app"],
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 const mongo="mongodb+srv://siddh2k1:mongo@sidcluster1.fhfsn.mongodb.net/whiteboard?retryWrites=true&w=majority&appName=sidcluster1";
 mongoose.connect(mongo)
   .then(() => console.log('Connected to MongoDB'))
