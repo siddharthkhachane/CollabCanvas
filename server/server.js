@@ -5,8 +5,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST"],
+  credentials: false
+};
+app.use(cors(corsOptions));
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
