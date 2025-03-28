@@ -35,6 +35,12 @@ app.post('/api/rooms', async (req, res) => {
     res.status(500).json({ error: 'Failed to create room' });
   }
 });
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'Backend is working!',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Socket.io connections
 io.on('connection', (socket) => {
