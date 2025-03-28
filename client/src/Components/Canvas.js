@@ -11,7 +11,7 @@ const Canvas = ({ roomId, userName }) => {
   useEffect(() => {
     // Connect to socket server
     //const newSocket = io('http://localhost:5000');
-    const newSocket = io('https://collabcanvas-364y.onrender.com');
+    const newSocket = io('https://skproject-a3.wl.r.appspot.com/');
 
     setSocket(newSocket);
     
