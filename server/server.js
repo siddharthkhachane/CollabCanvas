@@ -10,8 +10,8 @@ const corsOptions = {
   methods: ["GET", "POST"],
   credentials: false
 };
-app.use(cors(corsOptions));
 const app = express();
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const server = http.createServer(app);
