@@ -13,7 +13,7 @@ const Home = () => {
     }
     
     try {
-      const response = await axios.post('http://localhost:5000/api/rooms');
+      const response = await axios.post('https://collabcanvas-364v.onrender.com/api/rooms');
       const { roomId } = response.data;
       navigate(`/room/${roomId}?name=${userName}`);
     } catch (error) {
