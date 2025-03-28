@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
+import {io} from 'socket.io-client';
 
 const Canvas = ({ roomId, userName }) => {
   const canvasRef = useRef(null);
