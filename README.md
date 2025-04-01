@@ -1,5 +1,10 @@
-node server.js
+Link to Live demo: https://sidproject-41.wl.r.appspot.com/
 
+
+Run Locally:
+
+Backend: node server.js
+Frontend:
 npm install
 npm uninstall react react-dom
 npm install react@18.2.0 react-dom@18.2.0
