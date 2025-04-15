@@ -12,3 +12,12 @@ npm uninstall @testing-library/react
 npm install @testing-library/react@latest
 npm install react-router-dom@6
 npm start
+
+
+
+  const context = canvas.getContext('2d');
+  const blank = document.createElement('canvas');
+  blank.width = canvas.width;
+  blank.height = canvas.height;
+
+  return canvas.toDataURL() === blank.toDataURL();
