@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {io} from 'socket.io-client';
+import './custom.css';
 
 const Canvas = ({ roomId, userName }) => {
   const canvasRef = useRef(null);
   const [socket, setSocket] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [color, setColor] = useState('#000000');
+  const [color, setColor] = useState('#6366f1');
   const [users, setUsers] = useState([]);
+  const [brushSize, setBrushSize] = useState(3);
+  const [tool, setTool] = useState('brush');
   
   useEffect(() => {
     // Connect to socket server
-    //const newSocket = io('http://localhost:5000');
     const newSocket = io('https://skproject-a3.wl.r.appspot.com/');
-    //const newSocket = io('https://collabcanvas-364y.onrender.com/');
-
     setSocket(newSocket);
     
     // Join room when component mounts
@@ -24,6 +24,8 @@ const Canvas = ({ roomId, userName }) => {
     // Setup canvas
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
     
     // Handle cleanup
     return () => {
@@ -40,8 +42,9 @@ const Canvas = ({ roomId, userName }) => {
       const context = canvas.getContext('2d');
       
       context.strokeStyle = data.color;
-      context.lineWidth = 3;
+      context.lineWidth = data.size || 3;
       context.lineCap = 'round';
+      context.lineJoin = 'round';
       
       context.beginPath();
       context.moveTo(data.startX, data.startY);
@@ -88,9 +91,10 @@ const Canvas = ({ roomId, userName }) => {
     const endX = e.nativeEvent.offsetX;
     const endY = e.nativeEvent.offsetY;
     
-    context.strokeStyle = color;
-    context.lineWidth = 3;
+    context.strokeStyle = tool === 'eraser' ? '#FFFFFF' : color;
+    context.lineWidth = brushSize;
     context.lineCap = 'round';
+    context.lineJoin = 'round';
     
     context.lineTo(endX, endY);
     context.stroke();
@@ -98,7 +102,14 @@ const Canvas = ({ roomId, userName }) => {
     // Emit drawing data to server
     socket.emit('draw', {
       roomId,
-      drawData: { startX, startY, endX, endY, color }
+      drawData: { 
+        startX, 
+        startY, 
+        endX, 
+        endY, 
+        color: tool === 'eraser' ? '#FFFFFF' : color,
+        size: brushSize
+      }
     });
   };
   
@@ -121,34 +132,95 @@ const Canvas = ({ roomId, userName }) => {
   };
   
   return (
-    <div>
-      <div style={{ marginBottom: '10px' }}>
-        <input 
-          type="color" 
-          value={color} 
-          onChange={(e) => setColor(e.target.value)} 
-        />
-        <button onClick={clearCanvas}>Clear</button>
-        <div>
-          <strong>Users in room:</strong>
-          {users.map((user, index) => (
-            <span 
-              key={index} 
-              style={{ 
-                margin: '0 5px', 
-                color: user.color 
-              }}
+    <div className="canvas-wrapper">
+      <div className="canvas-tools">
+        <div className="tools-row">
+          <div className="tool-group">
+            <span className="tool-label">Color:</span>
+            <input 
+              type="color" 
+              value={color} 
+              onChange={(e) => setColor(e.target.value)} 
+              className="color-picker"
+              disabled={tool === 'eraser'}
+            />
+          </div>
+          
+          <div className="tool-group">
+            <span className="tool-label">Size:</span>
+            <input 
+              type="range" 
+              min="1" 
+              max="20" 
+              value={brushSize} 
+              onChange={(e) => setBrushSize(parseInt(e.target.value))} 
+              className="size-slider"
+            />
+            <span className="size-value">{brushSize}px</span>
+          </div>
+          
+          <div className="tool-group">
+            <button 
+              onClick={() => setTool('brush')} 
+              className={`tool-button ${tool === 'brush' ? 'active' : ''}`}
             >
-              {user.name}
-            </span>
-          ))}
+              Brush
+            </button>
+            <button 
+              onClick={() => setTool('eraser')} 
+              className={`tool-button ${tool === 'eraser' ? 'active' : ''}`}
+            >
+              Eraser
+            </button>
+          </div>
+          
+          <button 
+            onClick={clearCanvas} 
+            className="clear-button"
+          >
+            Clear Canvas
+          </button>
+        </div>
+        
+        <div className="users-container">
+          <div className="users-title">Users in room:</div>
+          <div className="users-list">
+            {users.map((user, index) => (
+              <span 
+                key={index} 
+                className="user-tag"
+              >
+                <span 
+                  className="user-color" 
+                  style={{ backgroundColor: user.color || '#6366f1' }}
+                ></span>
+                {user.name}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
+      
+      <div className="brush-preview">
+        <span 
+          className="brush-dot" 
+          style={{ 
+            backgroundColor: tool === 'eraser' ? '#FFFFFF' : color,
+            border: tool === 'eraser' ? '1px solid #d1d5db' : 'none',
+            width: `${Math.min(brushSize, 12)}px`, 
+            height: `${Math.min(brushSize, 12)}px` 
+          }}
+        ></span>
+        <span className="brush-text">
+          {tool === 'eraser' ? 'Erasing' : 'Drawing'} with {brushSize}px {tool}
+        </span>
+      </div>
+      
       <canvas
         ref={canvasRef}
         width={800}
         height={600}
-        style={{ border: '1px solid #000' }}
+        className="canvas-board"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
