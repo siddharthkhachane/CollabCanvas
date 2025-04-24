@@ -1,5 +1,7 @@
-Link to Live demo: https://sidproject-41.wl.r.appspot.com/
-Vercel: https://client-six-blond.vercel.app/
+Live Demo:
+Vercel: https://collab-canvas-topaz.vercel.app/
+Backend: https://collabcanvas-364y.onrender.com/
+
 
 Run Locally:
 
