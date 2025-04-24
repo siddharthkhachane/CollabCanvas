@@ -1,6 +1,6 @@
 Live Demo:
 Vercel: https://collab-canvas-topaz.vercel.app/
-Backend: https://collabcanvas-364y.onrender.com/
+Backend: https://collabcanvas-364y.onrender.com/api/test
 
 
 Run Locally:
