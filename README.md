@@ -2,6 +2,7 @@ Live Demo:
 Vercel: https://collab-canvas-topaz.vercel.app/
 Backend: https://collabcanvas-364y.onrender.com/api/test
 
+Te backend is deployed on render (it usually hibernates so need to wait for a few sec to get the first request. After that works normally.
 
 Run Locally:
 
