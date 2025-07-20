@@ -10,54 +10,47 @@ const Canvas = ({ roomId, userName }) => {
   const [users, setUsers] = useState([]);
   const [brushSize, setBrushSize] = useState(3);
   const [tool, setTool] = useState('brush');
-  
+  const [lastPos, setLastPos] = useState({ x: null, y: null });
+
   useEffect(() => {
-    // Connect to socket server
-    //const newSocket = io('https://skproject-a3.wl.r.appspot.com/');
     const newSocket = io('https://collabcanvas-364y.onrender.com/');
     setSocket(newSocket);
-    
-    // Join room when component mounts
+
     if (roomId && userName) {
       newSocket.emit('join-room', { roomId, userName });
     }
-    
-    // Setup canvas
+
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     context.lineCap = 'round';
     context.lineJoin = 'round';
-    
-    // Handle cleanup
+
     return () => {
       newSocket.disconnect();
     };
   }, [roomId, userName]);
-  
+
   useEffect(() => {
     if (!socket) return;
-    
-    // Listen for other users' drawing
+
     socket.on('draw-data', (data) => {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
-      
+
       context.strokeStyle = data.color;
       context.lineWidth = data.size || 3;
       context.lineCap = 'round';
       context.lineJoin = 'round';
-      
+
       context.beginPath();
       context.moveTo(data.startX, data.startY);
       context.lineTo(data.endX, data.endY);
       context.stroke();
     });
-    
-    // Listen for user joined events
+
     socket.on('user-joined', ({ users, canvasData }) => {
       setUsers(users);
-      
-      // If there's existing canvas data, load it
+
       if (canvasData) {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -69,69 +62,63 @@ const Canvas = ({ roomId, userName }) => {
       }
     });
   }, [socket]);
-  
+
   const startDrawing = (e) => {
+    setIsDrawing(true);
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
+    setLastPos({ x, y });
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    
-    setIsDrawing(true);
     context.beginPath();
-    context.moveTo(
-      e.nativeEvent.offsetX,
-      e.nativeEvent.offsetY
-    );
+    context.moveTo(x, y);
   };
-  
+
   const draw = (e) => {
     if (!isDrawing) return;
-    
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    const startX = e.nativeEvent.offsetX;
-    const startY = e.nativeEvent.offsetY;
-    const endX = e.nativeEvent.offsetX;
-    const endY = e.nativeEvent.offsetY;
-    
     context.strokeStyle = tool === 'eraser' ? '#FFFFFF' : color;
     context.lineWidth = brushSize;
     context.lineCap = 'round';
     context.lineJoin = 'round';
-    
-    context.lineTo(endX, endY);
+    context.beginPath();
+    context.moveTo(lastPos.x, lastPos.y);
+    context.lineTo(x, y);
     context.stroke();
-    
-    // Emit drawing data to server
     socket.emit('draw', {
       roomId,
-      drawData: { 
-        startX, 
-        startY, 
-        endX, 
-        endY, 
+      drawData: {
+        startX: lastPos.x,
+        startY: lastPos.y,
+        endX: x,
+        endY: y,
         color: tool === 'eraser' ? '#FFFFFF' : color,
         size: brushSize
       }
     });
+    setLastPos({ x, y });
   };
-  
+
   const stopDrawing = () => {
     setIsDrawing(false);
-    
-    // Save the current state of the canvas
+    setLastPos({ x: null, y: null });
     const canvas = canvasRef.current;
     const canvasData = canvas.toDataURL();
     socket.emit('save-canvas', { roomId, canvasData });
+    socket.emit('save-canvas', { roomId, canvasData: canvas.toDataURL() });
   };
-  
+
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Save empty canvas
-    socket.emit('save-canvas', { roomId, canvasData: canvas.toDataURL() });
+    const canvasData = canvas.toDataURL();
+    socket.emit('save-canvas', { roomId, canvasData });
   };
-  
+
   return (
     <div className="canvas-wrapper">
       <div className="canvas-tools">
@@ -146,7 +133,6 @@ const Canvas = ({ roomId, userName }) => {
               disabled={tool === 'eraser'}
             />
           </div>
-          
           <div className="tool-group">
             <span className="tool-label">Size:</span>
             <input 
@@ -159,7 +145,6 @@ const Canvas = ({ roomId, userName }) => {
             />
             <span className="size-value">{brushSize}px</span>
           </div>
-          
           <div className="tool-group">
             <button 
               onClick={() => setTool('brush')} 
@@ -174,7 +159,6 @@ const Canvas = ({ roomId, userName }) => {
               Eraser
             </button>
           </div>
-          
           <button 
             onClick={clearCanvas} 
             className="clear-button"
@@ -182,7 +166,6 @@ const Canvas = ({ roomId, userName }) => {
             Clear Canvas
           </button>
         </div>
-        
         <div className="users-container">
           <div className="users-title">Users in room:</div>
           <div className="users-list">
@@ -201,7 +184,6 @@ const Canvas = ({ roomId, userName }) => {
           </div>
         </div>
       </div>
-      
       <div className="brush-preview">
         <span 
           className="brush-dot" 
@@ -216,7 +198,6 @@ const Canvas = ({ roomId, userName }) => {
           {tool === 'eraser' ? 'Erasing' : 'Drawing'} with {brushSize}px {tool}
         </span>
       </div>
-      
       <canvas
         ref={canvasRef}
         width={800}
