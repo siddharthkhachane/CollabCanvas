@@ -87,8 +87,8 @@ const Canvas = ({ roomId, userName }) => {
     
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    const startX = e.nativeEvent.offsetX - 1;
-    const startY = e.nativeEvent.offsetY - 1;
+    const startX = e.nativeEvent.offsetX;
+    const startY = e.nativeEvent.offsetY;
     const endX = e.nativeEvent.offsetX;
     const endY = e.nativeEvent.offsetY;
     
